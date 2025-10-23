@@ -47,7 +47,7 @@ function loadCourses() {
                 duration: 0,
                 level: 'Beginner',
                 status: 'starting-soon',
-                price: 0,
+                price: 100,
                 icon: 'fas fa-terminal',
                 registerLink: 'https://forms.gle/6X8Z77YwKmVVE1VRA'
             }
