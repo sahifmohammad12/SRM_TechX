@@ -43,13 +43,25 @@ function loadCourses() {
                 id: 2,
                 name: 'Programming with C',
                 description: 'Learn the fundamentals of C programming language. Master variables, functions, arrays and pointers. Course runs until students understand the topic.',
-                startDate: '2025-10-25',
+                startDate: '2025-10-27',
                 duration: 0,
                 level: 'Beginner',
                 status: 'starting-soon',
                 price: 100,
                 icon: 'fas fa-terminal',
                 registerLink: 'https://forms.gle/6X8Z77YwKmVVE1VRA'
+            }
+            {
+                id: 3,
+                name: 'Python Basics and Beyond',
+                description: 'Learn the basics of Python — one of the most powerful and beginner-friendly programming languages. This course covers core concepts like variables, loops, functions, and object-oriented programming through hands-on projects, helping you build real-world coding skills and confidence.',
+                startDate: '2025-10-26',
+                duration: 0,
+                level: 'Beginner',
+                status: 'starting-soon',
+                price: 100,
+                icon: 'fas fa-terminal',
+                registerLink: 'https://forms.gle/zMUg1FhmkHEVHVcC8'
             }
         ];
         saveCourses();
