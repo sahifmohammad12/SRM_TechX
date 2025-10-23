@@ -50,7 +50,7 @@ function loadCourses() {
                 price: 100,
                 icon: 'fas fa-terminal',
                 registerLink: 'https://forms.gle/6X8Z77YwKmVVE1VRA'
-            }
+            },
             {
                 id: 3,
                 name: 'Python Basics and Beyond',
