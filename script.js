@@ -98,12 +98,16 @@ function saveCourses() {
 
 // Cloud storage configuration using JSONBin.io
 const CLOUD_STORAGE_URL = 'https://api.jsonbin.io/v3/b';
-const BIN_ID = 'YOUR_BIN_ID_HERE'; // Replace with your actual bin ID
-const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your actual API key
+const BIN_ID = '68fbca9b43b1c97be97dfa5f'; // Replace with your actual bin ID
+const API_KEY = '$2a$10$C5OrYbPp4eTmrHrgkxrwTeePQYCfY2C0oiZxYMQMXqbyMydpN4HRa'; // Replace with your actual API key
 
 // Load community members from cloud storage
 async function loadCommunityMembers() {
     try {
+        console.log('Attempting to load from cloud storage...');
+        console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}/latest`);
+        console.log('API Key:', API_KEY.substring(0, 10) + '...');
+        
         // Try to load from cloud storage
         const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}/latest`, {
             headers: {
@@ -111,15 +115,21 @@ async function loadCommunityMembers() {
             }
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('Raw response data:', data);
             communityMembers = data.record || [];
             console.log('Loaded community members from cloud storage:', communityMembers.length);
             
             // Also save to localStorage as backup
             localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
         } else {
-            throw new Error('Failed to load from cloud storage');
+            const errorText = await response.text();
+            console.error('Cloud storage error response:', errorText);
+            throw new Error(`Failed to load from cloud storage: ${response.status} - ${errorText}`);
         }
     } catch (error) {
         console.log('Cloud storage failed, trying localStorage:', error.message);
@@ -138,6 +148,10 @@ async function loadCommunityMembers() {
 // Save community members to cloud storage
 async function saveCommunityMembers() {
     try {
+        console.log('Attempting to save to cloud storage...');
+        console.log('Members to save:', communityMembers.length);
+        console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}`);
+        
         // Save to cloud storage
         const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}`, {
             method: 'PUT',
@@ -148,13 +162,18 @@ async function saveCommunityMembers() {
             body: JSON.stringify(communityMembers)
         });
         
+        console.log('Save response status:', response.status);
+        console.log('Save response ok:', response.ok);
+        
         if (response.ok) {
             console.log('Community members saved to cloud storage');
             
             // Also save to localStorage as backup
             localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
         } else {
-            throw new Error('Failed to save to cloud storage');
+            const errorText = await response.text();
+            console.error('Save error response:', errorText);
+            throw new Error(`Failed to save to cloud storage: ${response.status} - ${errorText}`);
         }
     } catch (error) {
         console.log('Cloud storage failed, saving to localStorage only:', error.message);
@@ -1316,6 +1335,35 @@ function testAdminPanel() {
         console.log('Community members tab loaded');
     } else {
         console.log('Community members tab not found');
+    }
+}
+
+// Test function to debug cloud storage
+async function testCloudStorage() {
+    console.log('=== Testing Cloud Storage ===');
+    console.log('BIN_ID:', BIN_ID);
+    console.log('API_KEY:', API_KEY.substring(0, 10) + '...');
+    console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}/latest`);
+    
+    try {
+        const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}/latest`, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', [...response.headers.entries()]);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Success! Data received:', data);
+        } else {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
     }
 }
 
