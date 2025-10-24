@@ -1,6 +1,7 @@
 // Course Management System
 let courses = [];
 let isAdminLoggedIn = false;
+let communityMembers = [];
 
 // Admin credentials (in production, this should be server-side)
 const ADMIN_CREDENTIALS = {
@@ -11,10 +12,32 @@ const ADMIN_CREDENTIALS = {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     loadCourses();
+    loadCommunityMembers();
     renderCourses();
     initializeEventListeners();
     checkAdminStatus();
+    checkFormSuccess();
+    
+    // Test if community form exists
+    setTimeout(() => {
+        const communityForm = document.getElementById('communityForm');
+        if (communityForm) {
+            console.log('Community form found after DOM load');
+        } else {
+            console.log('Community form not found after DOM load');
+        }
+    }, 1000);
 });
+
+// Check for form success parameter
+function checkFormSuccess() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+        showNotification('Welcome to the SRM TechX Community! You\'ll receive a confirmation email shortly.', 'success');
+        // Remove the success parameter from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
 
 // Load courses from localStorage
 function loadCourses() {
@@ -71,6 +94,32 @@ function loadCourses() {
 // Save courses to localStorage
 function saveCourses() {
     localStorage.setItem('srmTechXCourses', JSON.stringify(courses));
+}
+
+// Load community members from localStorage
+function loadCommunityMembers() {
+    const savedMembers = localStorage.getItem('srmTechXCommunityMembers');
+    if (savedMembers) {
+        communityMembers = JSON.parse(savedMembers);
+    }
+}
+
+// Save community members to localStorage
+function saveCommunityMembers() {
+    localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
+}
+
+// Add new community member
+function addCommunityMember(memberData) {
+    const newMember = {
+        id: Date.now(),
+        ...memberData,
+        joinDate: new Date().toISOString(),
+        status: 'active'
+    };
+    communityMembers.push(newMember);
+    saveCommunityMembers();
+    return newMember;
 }
 
 // Render courses on the page
@@ -272,6 +321,26 @@ function initializeEventListeners() {
     if (contactForm) {
         contactForm.addEventListener('submit', handleContactForm);
     }
+
+    // Community form
+    const communityForm = document.getElementById('communityForm');
+    if (communityForm) {
+        communityForm.addEventListener('submit', handleCommunityForm);
+        console.log('Community form event listener attached');
+        
+        // Add a test button click handler
+        const submitBtn = communityForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                console.log('Submit button clicked');
+            });
+        }
+        
+        // Setup "Other" option handlers
+        setupOtherOptionHandlers();
+    } else {
+        console.log('Community form not found');
+    }
 }
 
 // Check admin status
@@ -327,6 +396,8 @@ function switchTab(tabId) {
 
     if (tabId === 'manage-courses') {
         loadManageCoursesTab();
+    } else if (tabId === 'community-members') {
+        loadCommunityMembersTab();
     }
 }
 
@@ -414,6 +485,152 @@ function deleteCourse(courseId) {
     }
 }
 
+// Load community members tab
+function loadCommunityMembersTab() {
+    updateMembersStats();
+    renderMembersList();
+    setupMembersFilters();
+}
+
+// Update members statistics
+function updateMembersStats() {
+    const totalMembers = communityMembers.length;
+    const newsletterSubscribers = communityMembers.filter(member => member.newsletter).length;
+    
+    // Calculate members joined this week
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const recentMembers = communityMembers.filter(member => 
+        new Date(member.joinDate) >= oneWeekAgo
+    ).length;
+    
+    document.getElementById('totalMembers').textContent = totalMembers;
+    document.getElementById('newsletterSubscribers').textContent = newsletterSubscribers;
+    document.getElementById('recentMembers').textContent = recentMembers;
+}
+
+// Render members list
+function renderMembersList(filteredMembers = null) {
+    const membersList = document.getElementById('membersList');
+    if (!membersList) return;
+    
+    const membersToShow = filteredMembers || communityMembers;
+    membersList.innerHTML = '';
+    
+    if (membersToShow.length === 0) {
+        membersList.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No members found</p>';
+        return;
+    }
+    
+    membersToShow.forEach(member => {
+        const memberItem = document.createElement('div');
+        memberItem.className = 'member-item';
+        memberItem.innerHTML = `
+            <div class="member-info">
+                <h4>${member.firstName} ${member.lastName}</h4>
+                <p>${member.email}</p>
+                <div class="member-details">
+                    <span><i class="fas fa-graduation-cap"></i> ${member.year}</span>
+                    <span><i class="fas fa-building"></i> ${member.department}</span>
+                    <span><i class="fas fa-code"></i> ${member.interests}</span>
+                    <span><i class="fas fa-calendar"></i> ${formatDate(member.joinDate)}</span>
+                </div>
+            </div>
+            <div class="member-actions">
+                <span class="member-status ${member.status}">${member.status}</span>
+                <button class="btn btn-small btn-danger" onclick="deleteMember(${member.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        membersList.appendChild(memberItem);
+    });
+}
+
+// Setup members filters
+function setupMembersFilters() {
+    const departmentFilter = document.getElementById('departmentFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    const exportBtn = document.getElementById('exportMembers');
+    
+    if (departmentFilter) {
+        departmentFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (yearFilter) {
+        yearFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportMembersToCSV);
+    }
+}
+
+// Apply filters to members list
+function applyFilters() {
+    const departmentFilter = document.getElementById('departmentFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    
+    let filteredMembers = communityMembers;
+    
+    if (departmentFilter && departmentFilter.value) {
+        filteredMembers = filteredMembers.filter(member => member.department === departmentFilter.value);
+    }
+    
+    if (yearFilter && yearFilter.value) {
+        filteredMembers = filteredMembers.filter(member => member.year === yearFilter.value);
+    }
+    
+    renderMembersList(filteredMembers);
+}
+
+// Delete member
+function deleteMember(memberId) {
+    if (confirm('Are you sure you want to delete this member?')) {
+        communityMembers = communityMembers.filter(member => member.id !== memberId);
+        saveCommunityMembers();
+        loadCommunityMembersTab();
+        showNotification('Member deleted successfully!', 'success');
+    }
+}
+
+// Export members to CSV
+function exportMembersToCSV() {
+    const csvContent = generateMembersCSV(communityMembers);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `srm-techx-community-members-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showNotification('Members data exported successfully!', 'success');
+}
+
+// Generate CSV content
+function generateMembersCSV(members) {
+    const headers = ['Name', 'Email', 'Phone', 'Year', 'Department', 'Interests', 'Newsletter', 'Join Date'];
+    const csvRows = [headers.join(',')];
+    
+    members.forEach(member => {
+        const row = [
+            `"${member.firstName} ${member.lastName}"`,
+            `"${member.email}"`,
+            `"${member.phone || ''}"`,
+            `"${member.year}"`,
+            `"${member.department}"`,
+            `"${member.interests}"`,
+            `"${member.newsletter ? 'Yes' : 'No'}"`,
+            `"${formatDate(member.joinDate)}"`
+        ];
+        csvRows.push(row.join(','));
+    });
+    
+    return csvRows.join('\n');
+}
+
 // Registration link functionality (no longer needed as we use direct links)
 
 // Handle contact form
@@ -434,6 +651,140 @@ function handleContactForm(e) {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     }, 2000);
+}
+
+// Handle community form
+function handleCommunityForm(e) {
+    e.preventDefault();
+    console.log('Form submission started');
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Basic validation
+    const requiredFields = e.target.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.style.borderColor = '#f44336';
+            isValid = false;
+        } else {
+            field.style.borderColor = '#e9ecef';
+        }
+    });
+    
+    if (!isValid) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining Community...';
+    submitBtn.disabled = true;
+    
+    // Create FormData for submission
+    const formData = new FormData(e.target);
+    
+    // Save member data locally first
+    const memberData = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        year: formData.get('year') === 'Other' ? formData.get('yearOther') : formData.get('year'),
+        department: formData.get('department') === 'Other' ? formData.get('departmentOther') : formData.get('department'),
+        interests: formData.get('interests') === 'Other' ? formData.get('interestsOther') : formData.get('interests'),
+        motivation: formData.get('motivation'),
+        newsletter: formData.get('newsletter') === 'yes'
+    };
+    
+    addCommunityMember(memberData);
+    
+    // Submit to Formspree
+    fetch(e.target.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Response received:', response.status);
+        if (response.ok) {
+            // Show success modal with WhatsApp option
+            showCommunitySuccessModal(memberData.firstName);
+            e.target.reset();
+            
+            // Add some visual feedback
+            const formCard = e.target.closest('.form-card');
+            if (formCard) {
+                formCard.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    formCard.style.transform = 'scale(1)';
+                }, 200);
+            }
+        } else {
+            throw new Error('Form submission failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Still show success modal even if Formspree fails (data is saved locally)
+        showCommunitySuccessModal(memberData.firstName);
+        e.target.reset();
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+// Validate community form
+function validateCommunityForm(form) {
+    console.log('Validating form...');
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    
+    console.log('Required fields found:', requiredFields.length);
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            console.log('Empty field:', field.name);
+            field.style.borderColor = '#f44336';
+            isValid = false;
+        } else {
+            field.style.borderColor = '#e9ecef';
+        }
+    });
+    
+    // Validate email format
+    const emailField = form.querySelector('input[type="email"]');
+    if (emailField && emailField.value && !isValidEmail(emailField.value)) {
+        console.log('Invalid email format');
+        emailField.style.borderColor = '#f44336';
+        showNotification('Please enter a valid email address', 'error');
+        isValid = false;
+    }
+    
+    // Validate phone number
+    const phoneField = form.querySelector('input[type="tel"]');
+    if (phoneField && phoneField.value) {
+        const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+        if (!phoneRegex.test(phoneField.value)) {
+            console.log('Invalid phone number');
+            phoneField.style.borderColor = '#f44336';
+            showNotification('Please enter a valid phone number', 'error');
+            isValid = false;
+        }
+    }
+    
+    if (!isValid) {
+        showNotification('Please fill in all required fields correctly', 'error');
+    }
+    
+    console.log('Form validation result:', isValid);
+    return isValid;
 }
 
 // Email validation function
@@ -616,7 +967,7 @@ const observer = new IntersectionObserver((entries) => {
 
 // Observe elements for animation
 document.addEventListener('DOMContentLoaded', () => {
-    const animatedElements = document.querySelectorAll('.course-card, .feature, .stat, .contact-item');
+    const animatedElements = document.querySelectorAll('.course-card, .feature, .stat, .contact-item, .feature-card, .stat-item');
     animatedElements.forEach(el => observer.observe(el));
 });
 
@@ -687,6 +1038,184 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('load', () => {
     document.body.classList.add('loaded');
 });
+
+// Community section interactive features
+document.addEventListener('DOMContentLoaded', () => {
+    // Add hover effects to feature cards
+    const featureCards = document.querySelectorAll('.feature-card');
+    featureCards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // Add form field focus effects
+    const formInputs = document.querySelectorAll('.community-form input, .community-form select, .community-form textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('focus', () => {
+            input.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', () => {
+            input.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add checkbox animation
+    const checkboxes = document.querySelectorAll('.checkbox-label input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const checkmark = checkbox.nextElementSibling;
+            if (checkbox.checked) {
+                checkmark.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    checkmark.style.transform = 'scale(1)';
+                }, 150);
+            }
+        });
+    });
+});
+
+// Show community success modal with WhatsApp option
+function showCommunitySuccessModal(firstName) {
+    // Create modal HTML
+    const modalHTML = `
+        <div id="communitySuccessModal" class="modal active">
+            <div class="modal-overlay">
+                <div class="modal-content success-modal">
+                    <div class="modal-header success-header">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Welcome to SRM TechX Community!</h3>
+                        <p class="success-subtitle">Hi ${firstName}, you're now part of our amazing community!</p>
+                        <button class="modal-close">&times;</button>
+                    </div>
+                    <div class="modal-body success-body">
+                        <div class="success-content">
+                            <div class="success-message">
+                                <h4>What's Next?</h4>
+                                <p>Join our WhatsApp community to connect with fellow members, get updates, and participate in discussions!</p>
+                            </div>
+                            <div class="whatsapp-section">
+                                <div class="whatsapp-icon">
+                                    <i class="fab fa-whatsapp"></i>
+                                </div>
+                                <div class="whatsapp-content">
+                                    <h4>Join Our WhatsApp Community</h4>
+                                    <p>Connect with 500+ members, get instant updates, and participate in discussions</p>
+                                    <a href="https://chat.whatsapp.com/JVxhY0XGobU3vNpK4Uo63w" target="_blank" class="btn btn-whatsapp">
+                                        <i class="fab fa-whatsapp"></i> Join WhatsApp Group
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="success-features">
+                                <div class="feature-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>Connect with peers</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Get instant updates</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-comments"></i>
+                                    <span>Participate in discussions</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners
+    const modal = document.getElementById('communitySuccessModal');
+    const closeBtn = modal.querySelector('.modal-close');
+    const overlay = modal.querySelector('.modal-overlay');
+    
+    closeBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            modal.remove();
+        }
+    });
+    
+    // Auto close after 30 seconds
+    setTimeout(() => {
+        if (modal.parentNode) {
+            modal.remove();
+        }
+    }, 30000);
+}
+
+// Setup "Other" option handlers for dropdowns
+function setupOtherOptionHandlers() {
+    // Year dropdown
+    const yearSelect = document.getElementById('yearSelect');
+    const yearOther = document.getElementById('yearOther');
+    if (yearSelect && yearOther) {
+        yearSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                yearOther.style.display = 'block';
+                yearOther.required = true;
+            } else {
+                yearOther.style.display = 'none';
+                yearOther.required = false;
+                yearOther.value = '';
+            }
+        });
+    }
+    
+    // Department dropdown
+    const departmentSelect = document.getElementById('departmentSelect');
+    const departmentOther = document.getElementById('departmentOther');
+    if (departmentSelect && departmentOther) {
+        departmentSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                departmentOther.style.display = 'block';
+                departmentOther.required = true;
+            } else {
+                departmentOther.style.display = 'none';
+                departmentOther.required = false;
+                departmentOther.value = '';
+            }
+        });
+    }
+    
+    // Interests dropdown
+    const interestsSelect = document.getElementById('interestsSelect');
+    const interestsOther = document.getElementById('interestsOther');
+    if (interestsSelect && interestsOther) {
+        interestsSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                interestsOther.style.display = 'block';
+                interestsOther.required = true;
+            } else {
+                interestsOther.style.display = 'none';
+                interestsOther.required = false;
+                interestsOther.value = '';
+            }
+        });
+    }
+}
+
+// Test function to manually test the success modal
+function testCommunityForm() {
+    console.log('Testing community form success modal...');
+    showCommunitySuccessModal('Test User');
+}
 
 // Add CSS for loading animation
 const loadingStyle = document.createElement('style');

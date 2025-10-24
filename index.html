@@ -34,6 +34,9 @@
                     <a href="#achievements" class="nav-link">Achievements</a>
                 </li>
                 <li class="nav-item">
+                    <a href="#community" class="nav-link">Community</a>
+                </li>
+                <li class="nav-item">
                     <a href="#contact" class="nav-link">Contact</a>
                 </li>
                 <li class="nav-item admin-link" style="display: none;">
@@ -232,6 +235,151 @@
         </div>
     </section>
 
+    <!-- Community Section -->
+    <section id="community" class="community">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Join Our Community</h2>
+                <p class="section-subtitle">Connect with fellow learners, share knowledge, and grow together in the SRM TechX community</p>
+            </div>
+            <div class="community-content">
+                <div class="community-info">
+                    <div class="community-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>Connect & Network</h3>
+                            <p>Join a vibrant community of students, instructors, and tech enthusiasts of SRM TechX Community</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h3>Knowledge Sharing</h3>
+                            <p>Share your projects, ask questions, and learn from the collective wisdom of our community</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <h3>Career Growth</h3>
+                            <p>Get mentorship and career guidance from the instructors</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <h3>Events & Workshops</h3>
+                            <p>Participate in exclusive workshops, hackathons, and networking events</p>
+                        </div>
+                    </div>
+                    <div class="community-stats">
+                        <div class="stat-item">
+                            <h3>24+</h3>
+                            <p>Active Members</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>10+</h3>
+                            <p>Projects Shared</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>95%</h3>
+                            <p>Success Rate</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="community-form-container">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h3>Join SRM TechX Community</h3>
+                            <p>Fill out the form below to become part of our amazing community</p>
+                        </div>
+                        <form class="community-form" id="communityForm" action="https://formspree.io/f/xldpyjlj" method="POST">
+                            <input type="hidden" name="_subject" value="New SRM TechX Community Member">
+                            <input type="hidden" name="_next" value="?success=true">
+                            <input type="hidden" name="_captcha" value="false">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" name="firstName" placeholder="First Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="lastName" placeholder="Last Name" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" name="email" placeholder="Email Address" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="tel" name="phone" placeholder="Phone Number" required>
+                            </div>
+                            <div class="form-group">
+                                <select name="year" id="yearSelect" required>
+                                    <option value="">Select Your Year</option>
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">4th Year</option>
+                                    <option value="Graduate">Graduated</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <input type="text" name="yearOther" id="yearOther" placeholder="Please specify your year" style="display: none; margin-top: 10px;">
+                            </div>
+                            <div class="form-group">
+                                <select name="department" id="departmentSelect" required>
+                                    <option value="">Select Department</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Information Technology">Information Science</option>
+                                    <option value="Electronics & Communication">Electronics & Communication</option>
+                                    <option value="Mechanical">Mechanical</option>
+                                    <option value="Civil">Civil</option>
+                                    <option value="Electrical">Electrical</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <input type="text" name="departmentOther" id="departmentOther" placeholder="Please specify your department" style="display: none; margin-top: 10px;">
+                            </div>
+                            <div class="form-group">
+                                <select name="interests" id="interestsSelect" required>
+                                    <option value="">Select Your Interest</option>
+                                    <option value="Web Development">Web Development</option>
+                                    <option value="Mobile App Development">Mobile App Development</option>
+                                    <option value="Data Science">Data Science</option>
+                                    <option value="Machine Learning">Machine Learning</option>
+                                    <option value="Cybersecurity">Cybersecurity</option>
+                                    <option value="Cloud Computing">Cloud Computing</option>
+                                    <option value="DevOps">DevOps</option>
+                                    <option value="UI/UX Design">UI/UX Design</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <input type="text" name="interestsOther" id="interestsOther" placeholder="Please specify your interest" style="display: none; margin-top: 10px;">
+                            </div>
+                            <div class="form-group">
+                                <textarea name="motivation" placeholder="Why do you want to join our community?" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="newsletter" value="yes">
+                                    <span class="checkmark"></span>
+                                    Subscribe to our newsletter for updates and opportunities
+                                </label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="terms" value="yes" required>
+                                    <span class="checkmark"></span>
+                                    I agree to the <a href="#" class="terms-link">Terms & Conditions</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-large">
+                                <i class="fas fa-user-plus"></i> Join Community
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contact" class="contact">
         <div class="container">
@@ -293,6 +441,7 @@
                         <li><a href="#home">Home</a></li>
                         <li><a href="#courses">Courses</a></li>
                         <li><a href="#about">About</a></li>
+                        <li><a href="#community">Community</a></li>
                         <li><a href="#contact">Contact</a></li>
                     </ul>
                 </div>
@@ -360,6 +509,7 @@
                     <div class="admin-tabs">
                         <button class="tab-btn active" data-tab="add-course">Add Course</button>
                         <button class="tab-btn" data-tab="manage-courses">Manage Courses</button>
+                        <button class="tab-btn" data-tab="community-members">Community Members</button>
                     </div>
                     
                     <!-- Add Course Tab -->
@@ -432,6 +582,55 @@
                             <!-- Courses will be loaded here -->
                         </div>
                     </div>
+                    
+                    <!-- Community Members Tab -->
+                    <div id="community-members" class="tab-content">
+                        <div class="manage-header">
+                            <h4>Community Members</h4>
+                            <p>View and manage community member registrations</p>
+                        </div>
+                        <div class="members-stats">
+                            <div class="stat-card">
+                                <h3 id="totalMembers">0</h3>
+                                <p>Total Members</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="newsletterSubscribers">0</h3>
+                                <p>Newsletter Subscribers</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3 id="recentMembers">0</h3>
+                                <p>Joined This Week</p>
+                            </div>
+                        </div>
+                        <div class="members-filters">
+                            <select id="departmentFilter" class="filter-select">
+                                <option value="">All Departments</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Electronics & Communication">Electronics & Communication</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <select id="yearFilter" class="filter-select">
+                                <option value="">All Years</option>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                                <option value="Graduate">Graduate</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <button id="exportMembers" class="btn btn-outline">
+                                <i class="fas fa-download"></i> Export CSV
+                            </button>
+                        </div>
+                        <div id="membersList" class="members-list">
+                            <!-- Members will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -440,3 +639,445 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+                        <h3>3</h3>
+
+                        <p>Courses Offered</p>
+
+                    </div>
+
+                    <div class="stat">
+
+                        <h3>95%</h3>
+
+                        <p>Success Rate</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Contact Section -->
+
+    <section id="contact" class="contact">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <h2 class="section-title">Get In Touch</h2>
+
+                <p class="section-subtitle">Have questions? We'd love to hear from you</p>
+
+            </div>
+
+            <div class="contact-content">
+
+                <div class="contact-info">
+
+                    <div class="contact-item">
+
+                        <i class="fas fa-phone"></i>
+
+                        <div>
+
+                            <h4>Phone</h4>
+
+                            <p>+91 9632913989</p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="contact-item">
+
+                        <i class="fas fa-envelope"></i>
+
+                        <div>
+
+                            <h4>Email</h4>
+
+                            <p>srmtechx@gmail.com</p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <form class="contact-form" action="https://formspree.io/f/xldpyjlj" method="POST">
+
+                    <div class="form-group">
+
+                        <input type="text" name="name" placeholder="Your Name" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <input type="email" name="email" placeholder="Your Email" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <input type="text" name="subject" placeholder="Subject" required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Footer -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <div class="footer-content">
+
+                <div class="footer-section">
+
+                    <h3>SRM TechX</h3>
+
+                    <p>Empowering the next generation through cutting-edge educational technology.</p>
+
+                    <div class="social-links">
+
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+
+                        <a href="https://www.instagram.com/srm.techx?igsh=dndqMzg3cGRhOXVi"><i class="fab fa-instagram"></i></a>
+
+                    </div>
+
+                </div>
+
+                <div class="footer-section">
+
+                    <h4>Quick Links</h4>
+
+                    <ul>
+
+                        <li><a href="#home">Home</a></li>
+
+                        <li><a href="#courses">Courses</a></li>
+
+                        <li><a href="#about">About</a></li>
+
+                        <li><a href="#contact">Contact</a></li>
+
+                    </ul>
+
+                </div>
+
+                <div class="footer-section">
+
+                    <h4>Courses</h4>
+
+                    <ul>
+
+                        <li><a href="#courses">Tech HTML</a></li>
+
+                        <li><a href="#courses">Programming with C</a></li>
+
+                        <li><a href="#courses">Python Basics and Beyond</a></li>
+
+                    </ul>
+
+                </div>
+
+                <div class="footer-section">
+
+                    <h4>Contact Info</h4>
+
+                    <p><i class="fas fa-phone"></i> +91 9632913989</p>
+
+                    <p><i class="fas fa-envelope"></i> srmtechx@gmail.com</p>
+
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+
+                <p>&copy; 2025 SRM TechX. All rights reserved.</p>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- Admin Login Modal -->
+
+    <div id="adminLoginModal" class="modal">
+
+        <div class="modal-overlay">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <div class="admin-icon">
+
+                        <i class="fas fa-shield-alt"></i>
+
+                    </div>
+
+                    <h3>Admin Access</h3>
+
+                    <p class="admin-subtitle">Secure Course Management Portal</p>
+
+                    <button class="modal-close">&times;</button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <form id="adminLoginForm">
+
+                        <div class="form-group">
+
+                            <input type="text" id="adminUsername" placeholder="Enter Username" required>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <input type="password" id="adminPassword" placeholder="Enter Password" required>
+
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+
+                            <i class="fas fa-sign-in-alt"></i> Access Dashboard
+
+                        </button>
+
+                    </form>
+
+                    <div class="admin-footer">
+
+                        <p><i class="fas fa-lock"></i> Secure Admin Portal</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Admin Panel Modal -->
+
+    <div id="adminPanelModal" class="modal">
+
+        <div class="modal-overlay">
+
+            <div class="modal-content admin-panel">
+
+                <div class="modal-header">
+
+                    <h3>Course Management</h3>
+
+                    <button class="modal-close">&times;</button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="admin-tabs">
+
+                        <button class="tab-btn active" data-tab="add-course">Add Course</button>
+
+                        <button class="tab-btn" data-tab="manage-courses">Manage Courses</button>
+
+                    </div>
+
+                    
+
+                    <!-- Add Course Tab -->
+
+                    <div id="add-course" class="tab-content active">
+
+                        <form id="addCourseForm">
+
+                            <div class="form-group">
+
+                                <input type="text" id="courseName" placeholder="Course Name" required>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <textarea id="courseDescription" placeholder="Course Description" rows="3" required></textarea>
+
+                            </div>
+
+                            <div class="form-row">
+
+                                <div class="form-group">
+
+                                    <input type="date" id="courseStartDate" required>
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    <input type="number" id="courseDuration" placeholder="Duration (weeks)" required>
+
+                                </div>
+
+                            </div>
+
+                            <div class="form-row">
+
+                                <div class="form-group">
+
+                                    <select id="courseLevel" required>
+
+                                        <option value="">Select Level</option>
+
+                                        <option value="Beginner">Beginner</option>
+
+                                        <option value="Intermediate">Intermediate</option>
+
+                                        <option value="Advanced">Advanced</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    <select id="courseStatus" required>
+
+                                        <option value="">Select Status</option>
+
+                                        <option value="completed">Completed</option>
+
+                                        <option value="started">Started</option>
+
+                                        <option value="starting-soon">Starting Soon</option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <input type="number" id="coursePrice" placeholder="Price (₹)" required>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <select id="courseIcon" required>
+
+                                    <option value="">Select Icon</option>
+
+                                    <option value="fas fa-code">Code</option>
+
+                                    <option value="fas fa-terminal">Terminal</option>
+
+                                    <option value="fas fa-laptop-code">Laptop Code</option>
+
+                                    <option value="fas fa-mobile-alt">Mobile</option>
+
+                                    <option value="fas fa-brain">AI/Brain</option>
+
+                                    <option value="fas fa-shield-alt">Security</option>
+
+                                    <option value="fas fa-database">Database</option>
+
+                                    <option value="fas fa-cloud">Cloud</option>
+
+                                    <option value="fas fa-graduation-cap">Graduation</option>
+
+                                    <option value="fas fa-book">Book</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <input type="url" id="courseRegisterLink" placeholder="Registration Link (https://...)" required>
+
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Add Course</button>
+
+                        </form>
+
+                    </div>
+
+                    
+
+                    <!-- Manage Courses Tab -->
+
+                    <div id="manage-courses" class="tab-content">
+
+                        <div class="manage-header">
+
+                            <h4>Course Management</h4>
+
+                            <p>Edit course details and status</p>
+
+                        </div>
+
+                        <div id="coursesList" class="courses-list">
+
+                            <!-- Courses will be loaded here -->
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
+
+
