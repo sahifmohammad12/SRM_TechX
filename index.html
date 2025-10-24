@@ -509,7 +509,6 @@
                     <div class="admin-tabs">
                         <button class="tab-btn active" data-tab="add-course">Add Course</button>
                         <button class="tab-btn" data-tab="manage-courses">Manage Courses</button>
-                        <button class="tab-btn" data-tab="community-members">Community Members</button>
                     </div>
                     
                     <!-- Add Course Tab -->
@@ -583,57 +582,6 @@
                         </div>
                     </div>
                     
-                    <!-- Community Members Tab -->
-                    <div id="community-members" class="tab-content">
-                        <div class="manage-header">
-                            <h4>Community Members</h4>
-                            <p>View and manage community member registrations</p>
-                        </div>
-                        <div class="members-stats">
-                            <div class="stat-card">
-                                <h3 id="totalMembers">0</h3>
-                                <p>Total Members</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3 id="newsletterSubscribers">0</h3>
-                                <p>Newsletter Subscribers</p>
-                            </div>
-                            <div class="stat-card">
-                                <h3 id="recentMembers">0</h3>
-                                <p>Joined This Week</p>
-                            </div>
-                        </div>
-                        <div class="members-filters">
-                            <select id="departmentFilter" class="filter-select">
-                                <option value="">All Departments</option>
-                                <option value="Computer Science">Computer Science</option>
-                                <option value="Information Technology">Information Technology</option>
-                                <option value="Electronics & Communication">Electronics & Communication</option>
-                                <option value="Mechanical">Mechanical</option>
-                                <option value="Civil">Civil</option>
-                                <option value="Electrical">Electrical</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <select id="yearFilter" class="filter-select">
-                                <option value="">All Years</option>
-                                <option value="1st Year">1st Year</option>
-                                <option value="2nd Year">2nd Year</option>
-                                <option value="3rd Year">3rd Year</option>
-                                <option value="4th Year">4th Year</option>
-                                <option value="Graduate">Graduate</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <button id="reloadMembers" class="btn btn-outline">
-                                <i class="fas fa-sync-alt"></i> Reload Data
-                            </button>
-                            <button id="exportMembers" class="btn btn-outline">
-                                <i class="fas fa-download"></i> Export CSV
-                            </button>
-                        </div>
-                        <div id="membersList" class="members-list">
-                            <!-- Members will be loaded here -->
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
