@@ -101,6 +101,9 @@ function loadCommunityMembers() {
     const savedMembers = localStorage.getItem('srmTechXCommunityMembers');
     if (savedMembers) {
         communityMembers = JSON.parse(savedMembers);
+        console.log('Loaded community members from localStorage:', communityMembers.length);
+    } else {
+        console.log('No community members found in localStorage');
     }
 }
 
@@ -118,6 +121,8 @@ function addCommunityMember(memberData) {
         status: 'active'
     };
     communityMembers.push(newMember);
+    console.log('Added new community member:', newMember);
+    console.log('Total members now:', communityMembers.length);
     saveCommunityMembers();
     return newMember;
 }
@@ -381,6 +386,8 @@ function showAdminPanel() {
     if (modal) {
         modal.classList.add('active');
         loadManageCoursesTab();
+        // Also ensure community members are loaded
+        loadCommunityMembers();
     }
 }
 
@@ -397,6 +404,8 @@ function switchTab(tabId) {
     if (tabId === 'manage-courses') {
         loadManageCoursesTab();
     } else if (tabId === 'community-members') {
+        // Reload community members data before displaying
+        loadCommunityMembers();
         loadCommunityMembersTab();
     }
 }
@@ -487,6 +496,9 @@ function deleteCourse(courseId) {
 
 // Load community members tab
 function loadCommunityMembersTab() {
+    console.log('Loading community members tab...');
+    console.log('Total community members:', communityMembers.length);
+    console.log('Community members data:', communityMembers);
     updateMembersStats();
     renderMembersList();
     setupMembersFilters();
@@ -512,9 +524,13 @@ function updateMembersStats() {
 // Render members list
 function renderMembersList(filteredMembers = null) {
     const membersList = document.getElementById('membersList');
-    if (!membersList) return;
+    if (!membersList) {
+        console.log('membersList element not found!');
+        return;
+    }
     
     const membersToShow = filteredMembers || communityMembers;
+    console.log('Rendering members list with', membersToShow.length, 'members');
     membersList.innerHTML = '';
     
     if (membersToShow.length === 0) {
@@ -1215,6 +1231,39 @@ function setupOtherOptionHandlers() {
 function testCommunityForm() {
     console.log('Testing community form success modal...');
     showCommunitySuccessModal('Test User');
+}
+
+// Test function to add a sample community member
+function testAddCommunityMember() {
+    console.log('Adding test community member...');
+    const testMember = {
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        phone: '1234567890',
+        year: '2nd Year',
+        department: 'Computer Science',
+        interests: 'Web Development',
+        motivation: 'Testing the admin panel functionality',
+        newsletter: true
+    };
+    addCommunityMember(testMember);
+    console.log('Test member added. Total members:', communityMembers.length);
+}
+
+// Test function to check admin panel
+function testAdminPanel() {
+    console.log('Testing admin panel...');
+    console.log('Community members array:', communityMembers);
+    console.log('Members count:', communityMembers.length);
+    
+    // Try to load the community members tab
+    if (document.getElementById('community-members')) {
+        loadCommunityMembersTab();
+        console.log('Community members tab loaded');
+    } else {
+        console.log('Community members tab not found');
+    }
 }
 
 // Add CSS for loading animation
