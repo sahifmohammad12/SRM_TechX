@@ -96,22 +96,23 @@ function saveCourses() {
     localStorage.setItem('srmTechXCourses', JSON.stringify(courses));
 }
 
-// Cloud storage configuration using JSONBin.io
-const CLOUD_STORAGE_URL = 'https://api.jsonbin.io/v3/b';
-const BIN_ID = '68fbca9b43b1c97be97dfa5f'; // Replace with your actual bin ID
-const API_KEY = '$2a$10$C5OrYbPp4eTmrHrgkxrwTeePQYCfY2C0oiZxYMQMXqbyMydpN4HRa'; // Replace with your actual API key
+// Supabase configuration
+const SUPABASE_URL = 'https://fsiuvjqvxshllwvwavui.supabase.co'; // Replace with your Supabase project URL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaXV2anF2eHNobGx3dndhdnVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjYxMTcsImV4cCI6MjA3NjkwMjExN30.SOHFQYzFpQS2NkMN8HMtpkIQK1UhCw2v5WqA-8m8P4Y'; // Replace with your Supabase anon key
+const SUPABASE_TABLE = 'community_members'; // Table name for storing members
 
-// Load community members from cloud storage
+// Load community members from Supabase
 async function loadCommunityMembers() {
     try {
-        console.log('Attempting to load from cloud storage...');
-        console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}/latest`);
-        console.log('API Key:', API_KEY.substring(0, 10) + '...');
+        console.log('Attempting to load from Supabase...');
+        console.log('URL:', `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`);
         
-        // Try to load from cloud storage
-        const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}/latest`, {
+        // Try to load from Supabase
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=*&order=created_at.desc`, {
             headers: {
-                'X-Master-Key': API_KEY
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
             }
         });
         
@@ -121,24 +122,34 @@ async function loadCommunityMembers() {
         if (response.ok) {
             const data = await response.json();
             console.log('Raw response data:', data);
-            const rawMembers = data.record || [];
             
-            // Filter out placeholder entries
-            communityMembers = rawMembers.filter(member => 
-                member.id !== 'placeholder' && !member.placeholder
-            );
+            // Convert Supabase data to our format
+            communityMembers = data.map(member => ({
+                id: member.id, // Use Supabase's auto-generated ID
+                firstName: member.first_name,
+                lastName: member.last_name,
+                email: member.email,
+                phone: member.phone,
+                year: member.year,
+                department: member.department,
+                interests: member.interests,
+                motivation: member.motivation,
+                newsletter: member.newsletter,
+                joinDate: member.created_at,
+                status: member.status || 'active'
+            }));
             
-            console.log('Loaded community members from cloud storage:', communityMembers.length);
+            console.log('Loaded community members from Supabase:', communityMembers.length);
             
             // Also save to localStorage as backup
             localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
         } else {
             const errorText = await response.text();
-            console.error('Cloud storage error response:', errorText);
-            throw new Error(`Failed to load from cloud storage: ${response.status} - ${errorText}`);
+            console.error('Supabase error response:', errorText);
+            throw new Error(`Failed to load from Supabase: ${response.status} - ${errorText}`);
         }
     } catch (error) {
-        console.log('Cloud storage failed, trying localStorage:', error.message);
+        console.log('Supabase failed, trying localStorage:', error.message);
         
         // Fallback to localStorage
         const savedMembers = localStorage.getItem('srmTechXCommunityMembers');
@@ -151,48 +162,72 @@ async function loadCommunityMembers() {
     }
 }
 
-// Save community members to cloud storage
+// Save community members to Supabase
 async function saveCommunityMembers() {
     try {
-        console.log('Attempting to save to cloud storage...');
+        console.log('Attempting to save to Supabase...');
         console.log('Members to save:', communityMembers.length);
-        console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}`);
-        console.log('Data being saved:', communityMembers);
+        console.log('URL:', `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`);
         
-        // Ensure we always save a valid structure (not empty array)
-        const dataToSave = communityMembers.length > 0 ? communityMembers : [
-            {
-                "placeholder": "No community members yet",
-                "id": "placeholder",
-                "createdAt": new Date().toISOString()
-            }
-        ];
+        // Convert our format to Supabase format (exclude id as it's auto-generated)
+        const supabaseData = communityMembers.map(member => ({
+            first_name: member.firstName,
+            last_name: member.lastName,
+            email: member.email,
+            phone: member.phone,
+            year: member.year,
+            department: member.department,
+            interests: member.interests,
+            motivation: member.motivation,
+            newsletter: member.newsletter,
+            status: member.status || 'active',
+            created_at: member.joinDate || new Date().toISOString()
+        }));
         
-        // Save to cloud storage
-        const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}`, {
-            method: 'PUT',
+        // First, clear all existing data
+        const deleteResponse = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+            method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify(dataToSave)
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            }
         });
         
-        console.log('Save response status:', response.status);
-        console.log('Save response ok:', response.ok);
+        console.log('Delete response status:', deleteResponse.status);
         
-        if (response.ok) {
-            console.log('Community members saved to cloud storage successfully');
+        // Then insert all current data
+        if (supabaseData.length > 0) {
+            const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(supabaseData)
+            });
             
-            // Also save to localStorage as backup (save the actual data, not placeholder)
-            localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
+            console.log('Insert response status:', insertResponse.status);
+            console.log('Insert response ok:', insertResponse.ok);
+            
+            if (insertResponse.ok) {
+                console.log('Community members saved to Supabase successfully');
+                
+                // Also save to localStorage as backup
+                localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
+            } else {
+                const errorText = await insertResponse.text();
+                console.error('Insert error response:', errorText);
+                throw new Error(`Failed to save to Supabase: ${insertResponse.status} - ${errorText}`);
+            }
         } else {
-            const errorText = await response.text();
-            console.error('Save error response:', errorText);
-            throw new Error(`Failed to save to cloud storage: ${response.status} - ${errorText}`);
+            console.log('No members to save, data cleared from Supabase');
+            localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
         }
     } catch (error) {
-        console.log('Cloud storage failed, saving to localStorage only:', error.message);
+        console.log('Supabase failed, saving to localStorage only:', error.message);
         
         // Fallback to localStorage only
         localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
