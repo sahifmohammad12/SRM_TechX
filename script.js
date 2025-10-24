@@ -121,7 +121,13 @@ async function loadCommunityMembers() {
         if (response.ok) {
             const data = await response.json();
             console.log('Raw response data:', data);
-            communityMembers = data.record || [];
+            const rawMembers = data.record || [];
+            
+            // Filter out placeholder entries
+            communityMembers = rawMembers.filter(member => 
+                member.id !== 'placeholder' && !member.placeholder
+            );
+            
             console.log('Loaded community members from cloud storage:', communityMembers.length);
             
             // Also save to localStorage as backup
@@ -153,6 +159,15 @@ async function saveCommunityMembers() {
         console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}`);
         console.log('Data being saved:', communityMembers);
         
+        // Ensure we always save a valid structure (not empty array)
+        const dataToSave = communityMembers.length > 0 ? communityMembers : [
+            {
+                "placeholder": "No community members yet",
+                "id": "placeholder",
+                "createdAt": new Date().toISOString()
+            }
+        ];
+        
         // Save to cloud storage
         const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}`, {
             method: 'PUT',
@@ -160,7 +175,7 @@ async function saveCommunityMembers() {
                 'Content-Type': 'application/json',
                 'X-Master-Key': API_KEY
             },
-            body: JSON.stringify(communityMembers)
+            body: JSON.stringify(dataToSave)
         });
         
         console.log('Save response status:', response.status);
@@ -169,7 +184,7 @@ async function saveCommunityMembers() {
         if (response.ok) {
             console.log('Community members saved to cloud storage successfully');
             
-            // Also save to localStorage as backup
+            // Also save to localStorage as backup (save the actual data, not placeholder)
             localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
         } else {
             const errorText = await response.text();
