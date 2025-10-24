@@ -10,9 +10,9 @@ const ADMIN_CREDENTIALS = {
 };
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     loadCourses();
-    loadCommunityMembers();
+    await loadCommunityMembers(); // Make sure this completes before rendering
     renderCourses();
     initializeEventListeners();
     checkAdminStatus();
@@ -96,20 +96,72 @@ function saveCourses() {
     localStorage.setItem('srmTechXCourses', JSON.stringify(courses));
 }
 
-// Load community members from localStorage
-function loadCommunityMembers() {
-    const savedMembers = localStorage.getItem('srmTechXCommunityMembers');
-    if (savedMembers) {
-        communityMembers = JSON.parse(savedMembers);
-        console.log('Loaded community members from localStorage:', communityMembers.length);
-    } else {
-        console.log('No community members found in localStorage');
+// Cloud storage configuration using JSONBin.io
+const CLOUD_STORAGE_URL = 'https://api.jsonbin.io/v3/b';
+const BIN_ID = 'YOUR_BIN_ID_HERE'; // Replace with your actual bin ID
+const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your actual API key
+
+// Load community members from cloud storage
+async function loadCommunityMembers() {
+    try {
+        // Try to load from cloud storage
+        const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}/latest`, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            communityMembers = data.record || [];
+            console.log('Loaded community members from cloud storage:', communityMembers.length);
+            
+            // Also save to localStorage as backup
+            localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
+        } else {
+            throw new Error('Failed to load from cloud storage');
+        }
+    } catch (error) {
+        console.log('Cloud storage failed, trying localStorage:', error.message);
+        
+        // Fallback to localStorage
+        const savedMembers = localStorage.getItem('srmTechXCommunityMembers');
+        if (savedMembers) {
+            communityMembers = JSON.parse(savedMembers);
+            console.log('Loaded community members from localStorage:', communityMembers.length);
+        } else {
+            console.log('No community members found in localStorage');
+        }
     }
 }
 
-// Save community members to localStorage
-function saveCommunityMembers() {
-    localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
+// Save community members to cloud storage
+async function saveCommunityMembers() {
+    try {
+        // Save to cloud storage
+        const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            },
+            body: JSON.stringify(communityMembers)
+        });
+        
+        if (response.ok) {
+            console.log('Community members saved to cloud storage');
+            
+            // Also save to localStorage as backup
+            localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
+        } else {
+            throw new Error('Failed to save to cloud storage');
+        }
+    } catch (error) {
+        console.log('Cloud storage failed, saving to localStorage only:', error.message);
+        
+        // Fallback to localStorage only
+        localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
+    }
 }
 
 // Add new community member
@@ -405,8 +457,9 @@ function switchTab(tabId) {
         loadManageCoursesTab();
     } else if (tabId === 'community-members') {
         // Reload community members data before displaying
-        loadCommunityMembers();
-        loadCommunityMembersTab();
+        loadCommunityMembers().then(() => {
+            loadCommunityMembersTab();
+        });
     }
 }
 
