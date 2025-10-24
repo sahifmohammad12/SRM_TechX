@@ -335,6 +335,11 @@ function initializeEventListeners() {
             const modal = e.target.closest('.modal');
             if (modal) {
                 modal.classList.remove('active');
+                
+                // Stop auto-refresh when admin panel is closed
+                if (modal.id === 'adminPanelModal') {
+                    stopAutoRefresh();
+                }
             }
         });
     });
@@ -574,6 +579,42 @@ function loadCommunityMembersTab() {
     updateMembersStats();
     renderMembersList();
     setupMembersFilters();
+    
+    // Start auto-refresh for real-time updates
+    startAutoRefresh();
+}
+
+// Auto-refresh functionality
+let autoRefreshInterval;
+
+function startAutoRefresh() {
+    // Clear any existing interval
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+    
+    // Refresh every 30 seconds to check for updates from other devices
+    autoRefreshInterval = setInterval(async () => {
+        try {
+            const oldCount = communityMembers.length;
+            await loadCommunityMembers();
+            
+            // If member count changed, refresh the display
+            if (communityMembers.length !== oldCount) {
+                loadCommunityMembersTab();
+                showNotification('Data updated from other devices!', 'info');
+            }
+        } catch (error) {
+            console.log('Auto-refresh failed:', error.message);
+        }
+    }, 30000); // 30 seconds
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
 }
 
 // Update members statistics
@@ -640,6 +681,7 @@ function setupMembersFilters() {
     const departmentFilter = document.getElementById('departmentFilter');
     const yearFilter = document.getElementById('yearFilter');
     const exportBtn = document.getElementById('exportMembers');
+    const reloadBtn = document.getElementById('reloadMembers');
     
     if (departmentFilter) {
         departmentFilter.addEventListener('change', applyFilters);
@@ -651,6 +693,25 @@ function setupMembersFilters() {
     
     if (exportBtn) {
         exportBtn.addEventListener('click', exportMembersToCSV);
+    }
+    
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', async () => {
+            reloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reloading...';
+            reloadBtn.disabled = true;
+            
+            try {
+                await loadCommunityMembers();
+                loadCommunityMembersTab();
+                showNotification('Data reloaded successfully!', 'success');
+            } catch (error) {
+                console.error('Reload error:', error);
+                showNotification('Failed to reload data. Please try again.', 'error');
+            } finally {
+                reloadBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Reload Data';
+                reloadBtn.disabled = false;
+            }
+        });
     }
 }
 
@@ -673,12 +734,12 @@ function applyFilters() {
 }
 
 // Delete member
-function deleteMember(memberId) {
+async function deleteMember(memberId) {
     if (confirm('Are you sure you want to delete this member?')) {
         communityMembers = communityMembers.filter(member => member.id !== memberId);
-        saveCommunityMembers();
+        await saveCommunityMembers(); // Wait for cloud save to complete
         loadCommunityMembersTab();
-        showNotification('Member deleted successfully!', 'success');
+        showNotification('Member deleted successfully! Changes synced across all devices.', 'success');
     }
 }
 
