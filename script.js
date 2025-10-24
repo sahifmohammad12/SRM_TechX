@@ -151,6 +151,7 @@ async function saveCommunityMembers() {
         console.log('Attempting to save to cloud storage...');
         console.log('Members to save:', communityMembers.length);
         console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}`);
+        console.log('Data being saved:', communityMembers);
         
         // Save to cloud storage
         const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}`, {
@@ -166,7 +167,7 @@ async function saveCommunityMembers() {
         console.log('Save response ok:', response.ok);
         
         if (response.ok) {
-            console.log('Community members saved to cloud storage');
+            console.log('Community members saved to cloud storage successfully');
             
             // Also save to localStorage as backup
             localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
@@ -736,10 +737,21 @@ function applyFilters() {
 // Delete member
 async function deleteMember(memberId) {
     if (confirm('Are you sure you want to delete this member?')) {
-        communityMembers = communityMembers.filter(member => member.id !== memberId);
-        await saveCommunityMembers(); // Wait for cloud save to complete
-        loadCommunityMembersTab();
-        showNotification('Member deleted successfully! Changes synced across all devices.', 'success');
+        try {
+            // Remove from local array
+            communityMembers = communityMembers.filter(member => member.id !== memberId);
+            
+            // Save to cloud storage (this will update the cloud with the new array)
+            await saveCommunityMembers();
+            
+            // Refresh the display
+            loadCommunityMembersTab();
+            
+            showNotification('Member deleted successfully! Changes synced across all devices.', 'success');
+        } catch (error) {
+            console.error('Delete error:', error);
+            showNotification('Failed to delete member. Please try again.', 'error');
+        }
     }
 }
 
