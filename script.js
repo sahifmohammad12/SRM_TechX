@@ -1,32 +1,12 @@
 // Course Management System
 let courses = [];
-let isAdminLoggedIn = false;
-let communityMembers = [];
-
-// Admin credentials (in production, this should be server-side)
-const ADMIN_CREDENTIALS = {
-    username: 'SRM12',
-    password: 'Mussarat@12'
-};
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     loadCourses();
-    await loadCommunityMembers(); // Make sure this completes before rendering
     renderCourses();
     initializeEventListeners();
-    checkAdminStatus();
     checkFormSuccess();
-    
-    // Test if community form exists
-    setTimeout(() => {
-        const communityForm = document.getElementById('communityForm');
-        if (communityForm) {
-            console.log('Community form found after DOM load');
-        } else {
-            console.log('Community form not found after DOM load');
-        }
-    }, 1000);
 });
 
 // Check for form success parameter
@@ -96,166 +76,6 @@ function saveCourses() {
     localStorage.setItem('srmTechXCourses', JSON.stringify(courses));
 }
 
-// Supabase configuration
-const SUPABASE_URL = 'https://fsiuvjqvxshllwvwavui.supabase.co'; // Replace with your Supabase project URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaXV2anF2eHNobGx3dndhdnVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjYxMTcsImV4cCI6MjA3NjkwMjExN30.SOHFQYzFpQS2NkMN8HMtpkIQK1UhCw2v5WqA-8m8P4Y'; // Replace with your Supabase anon key
-const SUPABASE_TABLE = 'community_members'; // Table name for storing members
-
-// Load community members from Supabase
-async function loadCommunityMembers() {
-    try {
-        console.log('Attempting to load from Supabase...');
-        console.log('URL:', `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`);
-        
-        // Try to load from Supabase
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=*&order=created_at.desc`, {
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Raw response data:', data);
-            
-            // Convert Supabase data to our format
-            communityMembers = data.map(member => ({
-                id: member.id, // Use Supabase's auto-generated ID
-                firstName: member.first_name,
-                lastName: member.last_name,
-                email: member.email,
-                phone: member.phone,
-                year: member.year,
-                department: member.department,
-                interests: member.interests,
-                motivation: member.motivation,
-                newsletter: member.newsletter,
-                joinDate: member.created_at,
-                status: member.status || 'active'
-            }));
-            
-            console.log('Loaded community members from Supabase:', communityMembers.length);
-            
-            // Also save to localStorage as backup
-            localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
-        } else {
-            const errorText = await response.text();
-            console.error('Supabase error response:', errorText);
-            throw new Error(`Failed to load from Supabase: ${response.status} - ${errorText}`);
-        }
-    } catch (error) {
-        console.log('Supabase failed, trying localStorage:', error.message);
-        
-        // Fallback to localStorage
-        const savedMembers = localStorage.getItem('srmTechXCommunityMembers');
-        if (savedMembers) {
-            communityMembers = JSON.parse(savedMembers);
-            console.log('Loaded community members from localStorage:', communityMembers.length);
-        } else {
-            console.log('No community members found in localStorage');
-        }
-    }
-}
-
-// Save community members to Supabase
-async function saveCommunityMembers() {
-    try {
-        console.log('Attempting to save to Supabase...');
-        console.log('Members to save:', communityMembers.length);
-        console.log('URL:', `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`);
-        
-        // Convert our format to Supabase format (exclude id as it's auto-generated)
-        const supabaseData = communityMembers.map(member => ({
-            first_name: member.firstName,
-            last_name: member.lastName,
-            email: member.email,
-            phone: member.phone,
-            year: member.year,
-            department: member.department,
-            interests: member.interests,
-            motivation: member.motivation,
-            newsletter: member.newsletter,
-            status: member.status || 'active',
-            created_at: member.joinDate || new Date().toISOString()
-        }));
-        
-        // First, clear all existing data
-        const deleteResponse = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
-            method: 'DELETE',
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('Delete response status:', deleteResponse.status);
-        
-        // Then insert all current data
-        if (supabaseData.length > 0) {
-            const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify(supabaseData)
-            });
-            
-            console.log('Insert response status:', insertResponse.status);
-            console.log('Insert response ok:', insertResponse.ok);
-            
-            if (insertResponse.ok) {
-                console.log('Community members saved to Supabase successfully');
-                
-                // Also save to localStorage as backup
-                localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
-            } else {
-                const errorText = await insertResponse.text();
-                console.error('Insert error response:', errorText);
-                throw new Error(`Failed to save to Supabase: ${insertResponse.status} - ${errorText}`);
-            }
-        } else {
-            console.log('No members to save, data cleared from Supabase');
-            localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
-        }
-    } catch (error) {
-        console.log('Supabase failed, saving to localStorage only:', error.message);
-        
-        // Fallback to localStorage only
-        localStorage.setItem('srmTechXCommunityMembers', JSON.stringify(communityMembers));
-    }
-}
-
-// Add new community member
-async function addCommunityMember(memberData) {
-    const newMember = {
-        id: Date.now(),
-        ...memberData,
-        joinDate: new Date().toISOString(),
-        status: 'active'
-    };
-    communityMembers.push(newMember);
-    console.log('Added new community member:', newMember);
-    console.log('Total members now:', communityMembers.length);
-    
-    // Save to Supabase and wait for completion
-    try {
-        await saveCommunityMembers();
-        console.log('Member saved to Supabase successfully');
-    } catch (error) {
-        console.error('Failed to save member to Supabase:', error);
-    }
-    
-    return newMember;
-}
 
 // Render courses on the page
 function renderCourses() {
@@ -355,50 +175,12 @@ function initializeEventListeners() {
         }));
     }
 
-    // Admin toggle
-    const adminToggle = document.getElementById('adminToggle');
-    if (adminToggle) {
-        adminToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (isAdminLoggedIn) {
-                showAdminPanel();
-            } else {
-                showAdminLogin();
-            }
-        });
-    }
-
-    // Admin login form
-    const adminLoginForm = document.getElementById('adminLoginForm');
-    if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', handleAdminLogin);
-    }
-
-    // Add course form
-    const addCourseForm = document.getElementById('addCourseForm');
-    if (addCourseForm) {
-        addCourseForm.addEventListener('submit', handleAddCourse);
-    }
-
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.getAttribute('data-tab');
-            switchTab(tabId);
-        });
-    });
-
     // Modal close buttons
     document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const modal = e.target.closest('.modal');
             if (modal) {
                 modal.classList.remove('active');
-                
-                // Stop auto-refresh when admin panel is closed
-                if (modal.id === 'adminPanelModal') {
-                    stopAutoRefresh();
-                }
             }
         });
     });
@@ -466,389 +248,10 @@ function initializeEventListeners() {
     const communityForm = document.getElementById('communityForm');
     if (communityForm) {
         communityForm.addEventListener('submit', handleCommunityForm);
-        console.log('Community form event listener attached');
-        
-        // Add a test button click handler
-        const submitBtn = communityForm.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', function(e) {
-                console.log('Submit button clicked');
-            });
-        }
-        
-        // Setup "Other" option handlers
         setupOtherOptionHandlers();
-    } else {
-        console.log('Community form not found');
     }
 }
 
-// Check admin status
-function checkAdminStatus() {
-    const adminLink = document.querySelector('.admin-link');
-    if (adminLink) {
-        adminLink.style.display = 'block';
-    }
-}
-
-// Show admin login modal
-function showAdminLogin() {
-    const modal = document.getElementById('adminLoginModal');
-    if (modal) {
-        modal.classList.add('active');
-    }
-}
-
-// Handle admin login
-function handleAdminLogin(e) {
-    e.preventDefault();
-    const username = document.getElementById('adminUsername').value;
-    const password = document.getElementById('adminPassword').value;
-
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-        isAdminLoggedIn = true;
-        showNotification('Login successful!', 'success');
-        document.getElementById('adminLoginModal').classList.remove('active');
-        showAdminPanel();
-    } else {
-        showNotification('Invalid credentials!', 'error');
-    }
-}
-
-// Show admin panel
-function showAdminPanel() {
-    const modal = document.getElementById('adminPanelModal');
-    if (modal) {
-        modal.classList.add('active');
-        loadManageCoursesTab();
-        // Also ensure community members are loaded
-        loadCommunityMembers();
-    }
-}
-
-// Switch tabs
-function switchTab(tabId) {
-    // Remove active class from all tabs and contents
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-    // Add active class to selected tab and content
-    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-
-    if (tabId === 'manage-courses') {
-        loadManageCoursesTab();
-    } else if (tabId === 'community-members') {
-        // Reload community members data before displaying
-        loadCommunityMembers().then(() => {
-            loadCommunityMembersTab();
-        });
-    }
-}
-
-// Load manage courses tab
-function loadManageCoursesTab() {
-    const coursesList = document.getElementById('coursesList');
-    if (!coursesList) return;
-
-    coursesList.innerHTML = '';
-
-    courses.forEach(course => {
-        const courseItem = document.createElement('div');
-        courseItem.className = 'course-item';
-        courseItem.innerHTML = `
-            <div class="course-info">
-                <h4>${course.name}</h4>
-                <p>${getStatusText(course.status)} • ${course.level} • ${course.price === 0 ? 'Free' : '₹' + course.price.toLocaleString()}</p>
-                <div class="course-details">
-                    <span class="course-date"><i class="fas fa-calendar"></i> ${formatDate(course.startDate)}</span>
-                    <span class="course-duration"><i class="fas fa-clock"></i> ${course.duration === 0 ? 'Until students understand' : course.duration + ' weeks'}</span>
-                </div>
-            </div>
-            <div class="course-actions">
-                <div class="status-selector">
-                    <select onchange="changeCourseStatus(${course.id}, this.value)" class="status-dropdown">
-                        <option value="completed" ${course.status === 'completed' ? 'selected' : ''}>Completed</option>
-                        <option value="started" ${course.status === 'started' ? 'selected' : ''}>Started</option>
-                        <option value="starting-soon" ${course.status === 'starting-soon' ? 'selected' : ''}>Starting Soon</option>
-                    </select>
-                </div>
-                <button class="btn btn-small btn-danger" onclick="deleteCourse(${course.id})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        `;
-        coursesList.appendChild(courseItem);
-    });
-}
-
-// Handle add course
-function handleAddCourse(e) {
-    e.preventDefault();
-    
-    const newCourse = {
-        id: Date.now(),
-        name: document.getElementById('courseName').value,
-        description: document.getElementById('courseDescription').value,
-        startDate: document.getElementById('courseStartDate').value,
-        duration: parseInt(document.getElementById('courseDuration').value),
-        level: document.getElementById('courseLevel').value,
-        status: document.getElementById('courseStatus').value,
-        price: parseInt(document.getElementById('coursePrice').value),
-        icon: document.getElementById('courseIcon').value,
-        registerLink: document.getElementById('courseRegisterLink').value
-    };
-
-    courses.push(newCourse);
-    saveCourses();
-    renderCourses();
-    
-    showNotification('Course added successfully!', 'success');
-    document.getElementById('addCourseForm').reset();
-}
-
-// Change course status
-function changeCourseStatus(courseId, newStatus) {
-    const course = courses.find(c => c.id === courseId);
-    if (course) {
-        course.status = newStatus;
-        saveCourses();
-        renderCourses(); // Update main website immediately
-        loadManageCoursesTab(); // Update admin panel
-        showNotification(`Course status changed to "${getStatusText(newStatus)}"`, 'success');
-    }
-}
-
-// Delete course
-function deleteCourse(courseId) {
-    if (confirm('Are you sure you want to delete this course?')) {
-        courses = courses.filter(course => course.id !== courseId);
-        saveCourses();
-        renderCourses();
-        loadManageCoursesTab();
-        showNotification('Course deleted successfully!', 'success');
-    }
-}
-
-// Load community members tab
-function loadCommunityMembersTab() {
-    console.log('Loading community members tab...');
-    console.log('Total community members:', communityMembers.length);
-    console.log('Community members data:', communityMembers);
-    updateMembersStats();
-    renderMembersList();
-    setupMembersFilters();
-    
-    // Start auto-refresh for real-time updates
-    startAutoRefresh();
-}
-
-// Auto-refresh functionality
-let autoRefreshInterval;
-
-function startAutoRefresh() {
-    // Clear any existing interval
-    if (autoRefreshInterval) {
-        clearInterval(autoRefreshInterval);
-    }
-    
-    // Refresh every 30 seconds to check for updates from other devices
-    autoRefreshInterval = setInterval(async () => {
-        try {
-            const oldCount = communityMembers.length;
-            await loadCommunityMembers();
-            
-            // If member count changed, refresh the display
-            if (communityMembers.length !== oldCount) {
-                loadCommunityMembersTab();
-                showNotification('Data updated from other devices!', 'info');
-            }
-        } catch (error) {
-            console.log('Auto-refresh failed:', error.message);
-        }
-    }, 30000); // 30 seconds
-}
-
-function stopAutoRefresh() {
-    if (autoRefreshInterval) {
-        clearInterval(autoRefreshInterval);
-        autoRefreshInterval = null;
-    }
-}
-
-// Update members statistics
-function updateMembersStats() {
-    const totalMembers = communityMembers.length;
-    const newsletterSubscribers = communityMembers.filter(member => member.newsletter).length;
-    
-    // Calculate members joined this week
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const recentMembers = communityMembers.filter(member => 
-        new Date(member.joinDate) >= oneWeekAgo
-    ).length;
-    
-    document.getElementById('totalMembers').textContent = totalMembers;
-    document.getElementById('newsletterSubscribers').textContent = newsletterSubscribers;
-    document.getElementById('recentMembers').textContent = recentMembers;
-}
-
-// Render members list
-function renderMembersList(filteredMembers = null) {
-    const membersList = document.getElementById('membersList');
-    if (!membersList) {
-        console.log('membersList element not found!');
-        return;
-    }
-    
-    const membersToShow = filteredMembers || communityMembers;
-    console.log('Rendering members list with', membersToShow.length, 'members');
-    membersList.innerHTML = '';
-    
-    if (membersToShow.length === 0) {
-        membersList.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No members found</p>';
-        return;
-    }
-    
-    membersToShow.forEach(member => {
-        const memberItem = document.createElement('div');
-        memberItem.className = 'member-item';
-        memberItem.innerHTML = `
-            <div class="member-info">
-                <h4>${member.firstName} ${member.lastName}</h4>
-                <p>${member.email}</p>
-                <div class="member-details">
-                    <span><i class="fas fa-graduation-cap"></i> ${member.year}</span>
-                    <span><i class="fas fa-building"></i> ${member.department}</span>
-                    <span><i class="fas fa-code"></i> ${member.interests}</span>
-                    <span><i class="fas fa-calendar"></i> ${formatDate(member.joinDate)}</span>
-                </div>
-            </div>
-            <div class="member-actions">
-                <span class="member-status ${member.status}">${member.status}</span>
-                <button class="btn btn-small btn-danger" onclick="deleteMember(${member.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        membersList.appendChild(memberItem);
-    });
-}
-
-// Setup members filters
-function setupMembersFilters() {
-    const departmentFilter = document.getElementById('departmentFilter');
-    const yearFilter = document.getElementById('yearFilter');
-    const exportBtn = document.getElementById('exportMembers');
-    const reloadBtn = document.getElementById('reloadMembers');
-    
-    if (departmentFilter) {
-        departmentFilter.addEventListener('change', applyFilters);
-    }
-    
-    if (yearFilter) {
-        yearFilter.addEventListener('change', applyFilters);
-    }
-    
-    if (exportBtn) {
-        exportBtn.addEventListener('click', exportMembersToCSV);
-    }
-    
-    if (reloadBtn) {
-        reloadBtn.addEventListener('click', async () => {
-            reloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reloading...';
-            reloadBtn.disabled = true;
-            
-            try {
-                await loadCommunityMembers();
-                loadCommunityMembersTab();
-                showNotification('Data reloaded successfully!', 'success');
-            } catch (error) {
-                console.error('Reload error:', error);
-                showNotification('Failed to reload data. Please try again.', 'error');
-            } finally {
-                reloadBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Reload Data';
-                reloadBtn.disabled = false;
-            }
-        });
-    }
-}
-
-// Apply filters to members list
-function applyFilters() {
-    const departmentFilter = document.getElementById('departmentFilter');
-    const yearFilter = document.getElementById('yearFilter');
-    
-    let filteredMembers = communityMembers;
-    
-    if (departmentFilter && departmentFilter.value) {
-        filteredMembers = filteredMembers.filter(member => member.department === departmentFilter.value);
-    }
-    
-    if (yearFilter && yearFilter.value) {
-        filteredMembers = filteredMembers.filter(member => member.year === yearFilter.value);
-    }
-    
-    renderMembersList(filteredMembers);
-}
-
-// Delete member
-async function deleteMember(memberId) {
-    if (confirm('Are you sure you want to delete this member?')) {
-        try {
-            // Remove from local array
-            communityMembers = communityMembers.filter(member => member.id !== memberId);
-            
-            // Save to cloud storage (this will update the cloud with the new array)
-            await saveCommunityMembers();
-            
-            // Refresh the display
-            loadCommunityMembersTab();
-            
-            showNotification('Member deleted successfully! Changes synced across all devices.', 'success');
-        } catch (error) {
-            console.error('Delete error:', error);
-            showNotification('Failed to delete member. Please try again.', 'error');
-        }
-    }
-}
-
-// Export members to CSV
-function exportMembersToCSV() {
-    const csvContent = generateMembersCSV(communityMembers);
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `srm-techx-community-members-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showNotification('Members data exported successfully!', 'success');
-}
-
-// Generate CSV content
-function generateMembersCSV(members) {
-    const headers = ['Name', 'Email', 'Phone', 'Year', 'Department', 'Interests', 'Newsletter', 'Join Date'];
-    const csvRows = [headers.join(',')];
-    
-    members.forEach(member => {
-        const row = [
-            `"${member.firstName} ${member.lastName}"`,
-            `"${member.email}"`,
-            `"${member.phone || ''}"`,
-            `"${member.year}"`,
-            `"${member.department}"`,
-            `"${member.interests}"`,
-            `"${member.newsletter ? 'Yes' : 'No'}"`,
-            `"${formatDate(member.joinDate)}"`
-        ];
-        csvRows.push(row.join(','));
-    });
-    
-    return csvRows.join('\n');
-}
 
 // Registration link functionality (no longer needed as we use direct links)
 
@@ -873,9 +276,8 @@ function handleContactForm(e) {
 }
 
 // Handle community form
-async function handleCommunityForm(e) {
+function handleCommunityForm(e) {
     e.preventDefault();
-    console.log('Form submission started');
     
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
@@ -904,21 +306,7 @@ async function handleCommunityForm(e) {
     
     // Create FormData for submission
     const formData = new FormData(e.target);
-    
-    // Save member data locally first
-    const memberData = {
-        firstName: formData.get('firstName'),
-        lastName: formData.get('lastName'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        year: formData.get('year') === 'Other' ? formData.get('yearOther') : formData.get('year'),
-        department: formData.get('department') === 'Other' ? formData.get('departmentOther') : formData.get('department'),
-        interests: formData.get('interests') === 'Other' ? formData.get('interestsOther') : formData.get('interests'),
-        motivation: formData.get('motivation'),
-        newsletter: formData.get('newsletter') === 'yes'
-    };
-    
-    await addCommunityMember(memberData);
+    const firstName = formData.get('firstName');
     
     // Submit to Formspree
     fetch(e.target.action, {
@@ -929,28 +317,18 @@ async function handleCommunityForm(e) {
         }
     })
     .then(response => {
-        console.log('Response received:', response.status);
         if (response.ok) {
             // Show success modal with WhatsApp option
-            showCommunitySuccessModal(memberData.firstName);
+            showCommunitySuccessModal(firstName);
             e.target.reset();
-            
-            // Add some visual feedback
-            const formCard = e.target.closest('.form-card');
-            if (formCard) {
-                formCard.style.transform = 'scale(1.02)';
-                setTimeout(() => {
-                    formCard.style.transform = 'scale(1)';
-                }, 200);
-            }
         } else {
             throw new Error('Form submission failed');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        // Still show success modal even if Formspree fails (data is saved locally)
-        showCommunitySuccessModal(memberData.firstName);
+        // Still show success modal even if Formspree fails
+        showCommunitySuccessModal(firstName);
         e.target.reset();
     })
     .finally(() => {
@@ -959,58 +337,6 @@ async function handleCommunityForm(e) {
     });
 }
 
-// Validate community form
-function validateCommunityForm(form) {
-    console.log('Validating form...');
-    const requiredFields = form.querySelectorAll('[required]');
-    let isValid = true;
-    
-    console.log('Required fields found:', requiredFields.length);
-    
-    requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            console.log('Empty field:', field.name);
-            field.style.borderColor = '#f44336';
-            isValid = false;
-        } else {
-            field.style.borderColor = '#e9ecef';
-        }
-    });
-    
-    // Validate email format
-    const emailField = form.querySelector('input[type="email"]');
-    if (emailField && emailField.value && !isValidEmail(emailField.value)) {
-        console.log('Invalid email format');
-        emailField.style.borderColor = '#f44336';
-        showNotification('Please enter a valid email address', 'error');
-        isValid = false;
-    }
-    
-    // Validate phone number
-    const phoneField = form.querySelector('input[type="tel"]');
-    if (phoneField && phoneField.value) {
-        const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-        if (!phoneRegex.test(phoneField.value)) {
-            console.log('Invalid phone number');
-            phoneField.style.borderColor = '#f44336';
-            showNotification('Please enter a valid phone number', 'error');
-            isValid = false;
-        }
-    }
-    
-    if (!isValid) {
-        showNotification('Please fill in all required fields correctly', 'error');
-    }
-    
-    console.log('Form validation result:', isValid);
-    return isValid;
-}
-
-// Email validation function
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
 
 // Notification system
 function showNotification(message, type = 'info') {
@@ -1430,85 +756,6 @@ function setupOtherOptionHandlers() {
     }
 }
 
-// Test function to manually test the success modal
-function testCommunityForm() {
-    console.log('Testing community form success modal...');
-    showCommunitySuccessModal('Test User');
-}
-
-// Test function to add a sample community member
-function testAddCommunityMember() {
-    console.log('Adding test community member...');
-    const testMember = {
-        firstName: 'Test',
-        lastName: 'User',
-        email: 'test@example.com',
-        phone: '1234567890',
-        year: '2nd Year',
-        department: 'Computer Science',
-        interests: 'Web Development',
-        motivation: 'Testing the admin panel functionality',
-        newsletter: true
-    };
-    addCommunityMember(testMember);
-    console.log('Test member added. Total members:', communityMembers.length);
-}
-
-// Test function to check admin panel
-function testAdminPanel() {
-    console.log('Testing admin panel...');
-    console.log('Community members array:', communityMembers);
-    console.log('Members count:', communityMembers.length);
-    
-    // Try to load the community members tab
-    if (document.getElementById('community-members')) {
-        loadCommunityMembersTab();
-        console.log('Community members tab loaded');
-    } else {
-        console.log('Community members tab not found');
-    }
-}
-
-// Test function to debug Supabase connection
-async function testSupabaseConnection() {
-    console.log('=== Testing Supabase Connection ===');
-    console.log('SUPABASE_URL:', SUPABASE_URL);
-    console.log('SUPABASE_TABLE:', SUPABASE_TABLE);
-    console.log('API_KEY length:', SUPABASE_ANON_KEY.length);
-    console.log('API_KEY starts with:', SUPABASE_ANON_KEY.substring(0, 10));
-    console.log('URL:', `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`);
-    
-    // Check if API key is properly set
-    if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-        console.error('API key is not properly set!');
-        return;
-    }
-    
-    try {
-        // Test loading data with correct headers
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=*`, {
-            method: 'GET',
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', [...response.headers.entries()]);
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Success! Data received:', data);
-        } else {
-            const errorText = await response.text();
-            console.error('Error response:', errorText);
-        }
-    } catch (error) {
-        console.error('Fetch error:', error);
-    }
-}
 
 // Add CSS for loading animation
 const loadingStyle = document.createElement('style');
