@@ -235,7 +235,7 @@ async function saveCommunityMembers() {
 }
 
 // Add new community member
-function addCommunityMember(memberData) {
+async function addCommunityMember(memberData) {
     const newMember = {
         id: Date.now(),
         ...memberData,
@@ -245,7 +245,15 @@ function addCommunityMember(memberData) {
     communityMembers.push(newMember);
     console.log('Added new community member:', newMember);
     console.log('Total members now:', communityMembers.length);
-    saveCommunityMembers();
+    
+    // Save to Supabase and wait for completion
+    try {
+        await saveCommunityMembers();
+        console.log('Member saved to Supabase successfully');
+    } catch (error) {
+        console.error('Failed to save member to Supabase:', error);
+    }
+    
     return newMember;
 }
 
@@ -865,7 +873,7 @@ function handleContactForm(e) {
 }
 
 // Handle community form
-function handleCommunityForm(e) {
+async function handleCommunityForm(e) {
     e.preventDefault();
     console.log('Form submission started');
     
@@ -910,7 +918,7 @@ function handleCommunityForm(e) {
         newsletter: formData.get('newsletter') === 'yes'
     };
     
-    addCommunityMember(memberData);
+    await addCommunityMember(memberData);
     
     // Submit to Formspree
     fetch(e.target.action, {
@@ -1461,17 +1469,29 @@ function testAdminPanel() {
     }
 }
 
-// Test function to debug cloud storage
-async function testCloudStorage() {
-    console.log('=== Testing Cloud Storage ===');
-    console.log('BIN_ID:', BIN_ID);
-    console.log('API_KEY:', API_KEY.substring(0, 10) + '...');
-    console.log('URL:', `${CLOUD_STORAGE_URL}/${BIN_ID}/latest`);
+// Test function to debug Supabase connection
+async function testSupabaseConnection() {
+    console.log('=== Testing Supabase Connection ===');
+    console.log('SUPABASE_URL:', SUPABASE_URL);
+    console.log('SUPABASE_TABLE:', SUPABASE_TABLE);
+    console.log('API_KEY length:', SUPABASE_ANON_KEY.length);
+    console.log('API_KEY starts with:', SUPABASE_ANON_KEY.substring(0, 10));
+    console.log('URL:', `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`);
+    
+    // Check if API key is properly set
+    if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+        console.error('API key is not properly set!');
+        return;
+    }
     
     try {
-        const response = await fetch(`${CLOUD_STORAGE_URL}/${BIN_ID}/latest`, {
+        // Test loading data with correct headers
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=*`, {
+            method: 'GET',
             headers: {
-                'X-Master-Key': API_KEY
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
             }
         });
         
