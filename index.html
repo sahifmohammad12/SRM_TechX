@@ -502,86 +502,23 @@
         <div class="modal-overlay">
             <div class="modal-content admin-panel">
                 <div class="modal-header">
-                    <h3>Course Management</h3>
+                    <div class="admin-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>Course Status Management</h3>
+                    <p class="admin-subtitle">Update course status quickly and easily</p>
                     <button class="modal-close">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="admin-tabs">
-                        <button class="tab-btn active" data-tab="add-course">Add Course</button>
-                        <button class="tab-btn" data-tab="manage-courses">Manage Courses</button>
-                    </div>
-                    
-                    <!-- Add Course Tab -->
-                    <div id="add-course" class="tab-content active">
-                        <form id="addCourseForm">
-                            <div class="form-group">
-                                <input type="text" id="courseName" placeholder="Course Name" required>
-                            </div>
-                            <div class="form-group">
-                                <textarea id="courseDescription" placeholder="Course Description" rows="3" required></textarea>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <input type="date" id="courseStartDate" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="number" id="courseDuration" placeholder="Duration (weeks)" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <select id="courseLevel" required>
-                                        <option value="">Select Level</option>
-                                        <option value="Beginner">Beginner</option>
-                                        <option value="Intermediate">Intermediate</option>
-                                        <option value="Advanced">Advanced</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <select id="courseStatus" required>
-                                        <option value="">Select Status</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="started">Started</option>
-                                        <option value="starting-soon">Starting Soon</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <input type="number" id="coursePrice" placeholder="Price (₹)" required>
-                            </div>
-                            <div class="form-group">
-                                <select id="courseIcon" required>
-                                    <option value="">Select Icon</option>
-                                    <option value="fas fa-code">Code</option>
-                                    <option value="fas fa-terminal">Terminal</option>
-                                    <option value="fas fa-laptop-code">Laptop Code</option>
-                                    <option value="fas fa-mobile-alt">Mobile</option>
-                                    <option value="fas fa-brain">AI/Brain</option>
-                                    <option value="fas fa-shield-alt">Security</option>
-                                    <option value="fas fa-database">Database</option>
-                                    <option value="fas fa-cloud">Cloud</option>
-                                    <option value="fas fa-graduation-cap">Graduation</option>
-                                    <option value="fas fa-book">Book</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <input type="url" id="courseRegisterLink" placeholder="Registration Link (https://...)" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Add Course</button>
-                        </form>
-                    </div>
-                    
-                    <!-- Manage Courses Tab -->
-                    <div id="manage-courses" class="tab-content">
-                        <div class="manage-header">
-                            <h4>Course Management</h4>
-                            <p>Edit course details and status</p>
+                    <div class="status-management">
+                        <div class="management-header">
+                            <h4>Current Courses</h4>
+                            <p>Select a course and change its status</p>
                         </div>
-                        <div id="coursesList" class="courses-list">
+                        <div id="coursesStatusList" class="courses-status-list">
                             <!-- Courses will be loaded here -->
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </div>

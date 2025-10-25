@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCourses();
     initializeEventListeners();
     checkFormSuccess();
+    initializeAdminPanel();
 });
 
 // Check for form success parameter
@@ -770,3 +771,342 @@ loadingStyle.textContent = `
     }
 `;
 document.head.appendChild(loadingStyle);
+
+// Admin Panel Functionality
+function initializeAdminPanel() {
+    // Admin login functionality
+    const adminToggle = document.getElementById('adminToggle');
+    const adminLoginModal = document.getElementById('adminLoginModal');
+    const adminPanelModal = document.getElementById('adminPanelModal');
+    const adminLoginForm = document.getElementById('adminLoginForm');
+
+    if (adminToggle) {
+        adminToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            adminLoginModal.classList.add('active');
+        });
+    }
+
+    if (adminLoginForm) {
+        adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (username === 'SRM12' && password === 'Mussarat@12') {
+                adminLoginModal.classList.remove('active');
+                adminPanelModal.classList.add('active');
+                loadCoursesForAdmin();
+                showNotification('Welcome to Admin Panel!', 'success');
+            } else {
+                showNotification('Invalid credentials!', 'error');
+            }
+        });
+    }
+}
+
+// Load courses for admin panel
+function loadCoursesForAdmin() {
+    const coursesStatusList = document.getElementById('coursesStatusList');
+    if (!coursesStatusList) return;
+
+    coursesStatusList.innerHTML = '';
+
+    courses.forEach(course => {
+        const courseItem = createAdminCourseItem(course);
+        coursesStatusList.appendChild(courseItem);
+    });
+}
+
+// Create admin course item
+function createAdminCourseItem(course) {
+    const item = document.createElement('div');
+    item.className = 'admin-course-item';
+    item.innerHTML = `
+        <div class="course-info">
+            <div class="course-icon">
+                <i class="${course.icon}"></i>
+            </div>
+            <div class="course-details">
+                <h4>${course.name}</h4>
+                <p class="course-description">${course.description}</p>
+                <div class="course-meta">
+                    <span class="course-level">${course.level}</span>
+                    <span class="course-price">${course.price === 0 ? 'Free' : '₹' + course.price}</span>
+                </div>
+            </div>
+        </div>
+        <div class="status-controls">
+            <div class="current-status">
+                <span class="status-label">Current Status:</span>
+                <span class="status-badge ${course.status}">${getStatusText(course.status)}</span>
+            </div>
+            <div class="status-selector">
+                <select class="status-dropdown" data-course-id="${course.id}">
+                    <option value="completed" ${course.status === 'completed' ? 'selected' : ''}>Completed</option>
+                    <option value="started" ${course.status === 'started' ? 'selected' : ''}>Started</option>
+                    <option value="starting-soon" ${course.status === 'starting-soon' ? 'selected' : ''}>Starting Soon</option>
+                </select>
+                <button class="btn btn-update" data-course-id="${course.id}">
+                    <i class="fas fa-save"></i> Update
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Add event listener for update button
+    const updateBtn = item.querySelector('.btn-update');
+    const statusDropdown = item.querySelector('.status-dropdown');
+    
+    updateBtn.addEventListener('click', () => {
+        updateCourseStatus(course.id, statusDropdown.value);
+    });
+
+    // Add event listener for dropdown change
+    statusDropdown.addEventListener('change', () => {
+        updateBtn.style.opacity = '1';
+        updateBtn.style.transform = 'scale(1)';
+    });
+
+    return item;
+}
+
+// Update course status
+function updateCourseStatus(courseId, newStatus) {
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+
+    const oldStatus = course.status;
+    course.status = newStatus;
+    saveCourses();
+    renderCourses(); // Update the main course display
+    loadCoursesForAdmin(); // Update the admin panel
+    showNotification(`Course "${course.name}" status updated from ${getStatusText(oldStatus)} to ${getStatusText(newStatus)}`, 'success');
+}
+
+// Add CSS for admin panel
+const adminStyle = document.createElement('style');
+adminStyle.textContent = `
+    .admin-panel {
+        max-width: 800px;
+        width: 90%;
+    }
+    
+    .admin-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #7F72FE 0%, #0704AB 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+        font-size: 24px;
+    }
+    
+    .admin-subtitle {
+        color: #666;
+        margin: 10px 0 0 0;
+        text-align: center;
+    }
+    
+    .status-management {
+        padding: 20px 0;
+    }
+    
+    .management-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .management-header h4 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .management-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .courses-status-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .admin-course-item {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-course-item:hover {
+        border-color: #7F72FE;
+        box-shadow: 0 5px 20px rgba(127, 114, 254, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .course-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+    }
+    
+    .course-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #7F72FE 0%, #0704AB 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+    
+    .course-details h4 {
+        margin: 0 0 8px 0;
+        color: #333;
+        font-size: 18px;
+    }
+    
+    .course-description {
+        margin: 0 0 10px 0;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.4;
+        max-width: 300px;
+    }
+    
+    .course-meta {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .course-level, .course-price {
+        background: #e9ecef;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #666;
+    }
+    
+    .status-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 15px;
+    }
+    
+    .current-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .status-label {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-badge.completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-badge.started {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .status-badge.starting-soon {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .status-dropdown {
+        padding: 8px 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        background: white;
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+    
+    .status-dropdown:focus {
+        outline: none;
+        border-color: #7F72FE;
+    }
+    
+    .btn-update {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #7F72FE 0%, #0704AB 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        opacity: 0.7;
+        transform: scale(0.95);
+    }
+    
+    .btn-update:hover {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(127, 114, 254, 0.3);
+    }
+    
+    .btn-update:active {
+        transform: scale(0.95);
+    }
+    
+    @media (max-width: 768px) {
+        .admin-course-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+        }
+        
+        .status-controls {
+            align-items: stretch;
+        }
+        
+        .status-selector {
+            justify-content: space-between;
+        }
+        
+        .course-description {
+            max-width: 100%;
+        }
+    }
+`;
+document.head.appendChild(adminStyle);
