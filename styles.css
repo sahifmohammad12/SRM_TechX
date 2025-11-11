@@ -36,6 +36,7 @@ body {
     top: 0;
     width: 100%;
     background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     z-index: 1000;
     padding: 1rem 0;
@@ -617,6 +618,8 @@ a.btn:hover {
     opacity: 0;
     transition: all 0.3s ease;
     border-radius: 50%;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
 }
 
 .instructor-card:hover .instructor-overlay {
@@ -644,6 +647,7 @@ a.btn:hover {
     color: white;
     text-decoration: none;
     transition: all 0.3s ease;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -1565,6 +1569,7 @@ a.btn:hover {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 

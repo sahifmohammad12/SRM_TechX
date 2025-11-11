@@ -95,30 +95,14 @@
                         <img src="My Photo.jpeg" alt="Instructor 1">
                         <div class="instructor-overlay">
                             <div class="social-links">
-                                <a href="https://www.linkedin.com/in/mohammad-sahif-beary-53983230a"><i class="fab fa-linkedin"></i></a>
-                                <a href="https://github.com/sahifmohammad12"><i class="fab fa-github"></i></a>
-                                <a href="https://www.instagram.com/sahifmohammad12"><i class="fab fa-instagram"></i></a>
+                                <a href="https://www.linkedin.com/in/mohammad-sahif-beary-53983230a" title="Mohammad Sahif Beary LinkedIn"><i class="fab fa-linkedin"></i></a>
+                                <a href="https://github.com/sahifmohammad12" title="Mohammad Sahif Beary GitHub"><i class="fab fa-github"></i></a>
+                                <a href="https://www.instagram.com/sahifmohammad12" title="Mohammad Sahif Beary Instagram"><i class="fab fa-instagram"></i></a>
                             </div>
                         </div>
                     </div>
                     <div class="instructor-content">
                         <h3>Mohammad Sahif Beary</h3>
-                        <p class="instructor-title">Student Instructor</p>
-                    </div>
-                </div>
-                <div class="instructor-card">
-                    <div class="instructor-image">
-                        <img src="Mussarat Photo.jpg" alt="Instructor 2">
-                        <div class="instructor-overlay">
-                            <div class="social-links">
-                                <a href=" https://www.linkedin.com/in/mussarrat-kittur-8b6aa3295"><i class="fab fa-linkedin"></i></a>
-                                <a href="https://github.com/Mussarrat-cod"><i class="fab fa-github"></i></a>
-                                <a href=" https://www.instagram.com/mussarat.kittur"><i class="fab fa-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="instructor-content">
-                        <h3>Mussarat Kittur</h3>
                         <p class="instructor-title">Student Instructor</p>
                     </div>
                 </div>
@@ -314,6 +298,7 @@
                                 <input type="tel" name="phone" placeholder="Phone Number" required>
                             </div>
                             <div class="form-group">
+                                <label for="yearSelect">Select Your Year</label>
                                 <select name="year" id="yearSelect" required>
                                     <option value="">Select Your Year</option>
                                     <option value="1st Year">1st Year</option>
@@ -323,9 +308,10 @@
                                     <option value="Graduate">Graduated</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                <input type="text" name="yearOther" id="yearOther" placeholder="Please specify your year" style="display: none; margin-top: 10px;">
+                                <input type="text" name="yearOther" id="yearOther" placeholder="Please specify your year" class="hidden-input">
                             </div>
                             <div class="form-group">
+                                <label for="departmentSelect">Select Department</label>
                                 <select name="department" id="departmentSelect" required>
                                     <option value="">Select Department</option>
                                     <option value="Computer Science">Computer Science</option>
@@ -336,10 +322,11 @@
                                     <option value="Electrical">Electrical</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                <input type="text" name="departmentOther" id="departmentOther" placeholder="Please specify your department" style="display: none; margin-top: 10px;">
+                                <input type="text" name="departmentOther" id="departmentOther" placeholder="Please specify your department" class="hidden-input">
                             </div>
                             <div class="form-group">
-                                <select name="interests" id="interestsSelect" required>
+                                <label for="interestsSelect" class="visually-hidden">Select Your Interest</label>
+                                <select name="interests" id="interestsSelect" required title="Select Your Interest">
                                     <option value="">Select Your Interest</option>
                                     <option value="Web Development">Web Development</option>
                                     <option value="Mobile App Development">Mobile App Development</option>
@@ -351,7 +338,7 @@
                                     <option value="UI/UX Design">UI/UX Design</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                <input type="text" name="interestsOther" id="interestsOther" placeholder="Please specify your interest" style="display: none; margin-top: 10px;">
+                                <input type="text" name="interestsOther" id="interestsOther" placeholder="Please specify your interest">
                             </div>
                             <div class="form-group">
                                 <textarea name="motivation" placeholder="Why do you want to join our community?" rows="3" required></textarea>
@@ -431,8 +418,8 @@
                     <h3>SRM TechX</h3>
                     <p>Empowering the next generation through cutting-edge educational technology.</p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="https://www.instagram.com/srm.techx?igsh=dndqMzg3cGRhOXVi"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="SRM TechX LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://www.instagram.com/srm.techx?igsh=dndqMzg3cGRhOXVi" title="SRM TechX Instagram"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
                 <div class="footer-section">
@@ -527,3 +514,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
