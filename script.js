@@ -50,8 +50,8 @@ function loadCourses() {
                 startDate: '2025-11-05',
                 duration: 0,
                 level: 'Beginner',
-                status: 'starting-soon',
-                price: 100,
+                status: 'completed',
+                price: 200,
                 icon: 'fas fa-terminal',
                 registerLink: 'https://forms.gle/6X8Z77YwKmVVE1VRA'
             },
@@ -59,11 +59,11 @@ function loadCourses() {
                 id: 3,
                 name: 'Python Basics and Beyond',
                 description: 'Learn the basics of Python — one of the most powerful and beginner-friendly programming languages. This course covers core concepts like variables, loops, functions, and object-oriented programming through hands-on projects, helping you build real-world coding skills and confidence.',
-                startDate: '2025-11-07',
+                startDate: '2026-03-23',
                 duration: 0,
                 level: 'Beginner',
                 status: 'starting-soon',
-                price: 100,
+                price: 200,
                 icon: 'fas fa-terminal',
                 registerLink: 'https://forms.gle/zMUg1FhmkHEVHVcC8'
             }
